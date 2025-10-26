@@ -73,15 +73,38 @@
 
     <!-- Start Screen -->
     <div id="start-screen" class="quiz-card p-8 text-center">
-        <h2 class="text-2xl font-bold mb-4 text-gray-700">Welcome, M4/5 EP Students!</h2>
+        <h2 class="text-2xl font-bold mb-4 text-gray-700">Welcome, Grade 10 EFL Students!</h2>
         <p class="text-gray-600 mb-6">This quiz has 30 multiple-choice questions to test your basic chemistry and math skills before we start the course.</p>
         <p class="text-xl font-semibold mb-8 text-indigo-500">Total Questions: 30 MC + 10 Open-Ended</p>
-        <p class="text-red-500 font-bold mb-6 border-2 border-red-300 p-3 rounded-xl bg-red-50">
-            WARNING: This is a ONE-TIME test. Once you start, you must finish and submit, or your session will be locked!
-        </p>
-        <button id="start-quiz-btn" class="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-300">
-            Start Quiz
-        </button>
+        
+        <!-- NEW: Pre-Quiz Identity Form -->
+        <!-- The button is now inside the form, and the JS listener is on the form's submit event -->
+        <form id="pre-quiz-form" class="space-y-4 text-left mb-6">
+            <h3 class="text-lg font-bold text-gray-700 border-b pb-2">Student Identity Check</h3>
+            <label for="start-student-name" class="block text-sm font-medium text-gray-700">Complete Name (Required)</label>
+            <input type="text" id="start-student-name" required 
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            
+            <label for="start-student-number" class="block text-sm font-medium text-gray-700">Student Number (Required)</label>
+            <input type="text" id="start-student-number" required 
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            
+            <p class="text-red-500 font-bold mt-6 mb-4 border-2 border-red-300 p-3 rounded-xl bg-red-50 text-sm">
+                WARNING: This is a ONE-TIME test. Once you start, you must finish and submit, or your session will be locked!
+            </p>
+
+            <div class="flex items-start">
+                <input id="confirm-start" type="checkbox" required class="h-4 w-4 text-indigo-600 border-gray-300 rounded mt-1">
+                <label for="confirm-start" class="ml-2 text-sm text-gray-800 font-medium">
+                    I confirm my identity and understand this is a single, continuous attempt.
+                </label>
+            </div>
+
+            <!-- Button is now type="submit" and inside the form -->
+            <button type="submit" id="start-quiz-btn" class="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-300 mt-6">
+                Start Quiz
+            </button>
+        </form>
     </div>
 
     <!-- Quiz Already Taken/Abandoned Screen (LOCKOUT) -->
@@ -132,21 +155,21 @@
         </p>
 
         <!-- Formspree Submission Form -->
-        <form id="https://formspree.io/f/mdkpkoaq" class="space-y-6 text-left">
+        <form id="submission-form" class="space-y-6 text-left">
             <input type="hidden" name="MC Score" id="mc-score-input" value="0/30">
             
-            <!-- STUDENT IDENTIFICATION FIELDS -->
+            <!-- STUDENT IDENTIFICATION FIELDS (Values populated from start screen) -->
             <label for="student-name" class="block text-sm font-medium text-gray-700 mt-6">1. Complete Name (Required)</label>
-            <input type="text" name="Complete Name" id="student-name" required 
-                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <input type="text" name="Complete Name" id="student-name" required readonly
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100">
             
             <label for="student-nickname" class="block text-sm font-medium text-gray-700 mt-4">2. Nickname</label>
             <input type="text" name="Student Nickname" id="student-nickname"
-                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100">
 
             <label for="student-number" class="block text-sm font-medium text-gray-700 mt-4">3. Student Number (Required - for verification)</label>
-            <input type="text" name="Student Number" id="student-number" required 
-                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <input type="text" name="Student Number" id="student-number" required readonly
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500 bg-gray-100">
             <!-- END STUDENT IDENTIFICATION FIELDS -->
 
             <h4 class="text-lg font-bold text-gray-800 pt-4">4. Open-Ended Answers</h4>
@@ -175,9 +198,19 @@
 </div>
 
 <script>
-    // --- Configuration and Data ---
-    const FORMSPREE_ENDPOINT = https://formspree.io/f/mdkpkoaq// <<< REPLACE THIS
+    // --- Configuration, Data, and State Variables ---
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/mdkpkoaq"; // <<< REPLACE THIS
+    
+    // Configuration constants
     const LOCKOUT_KEY = 'diagnosticLockout';
+    const NAME_KEY = 'diagnosticStudentName';
+    const NICKNAME_KEY = 'diagnosticStudentNickname';
+    const NUMBER_KEY = 'diagnosticStudentNumber';
+
+    // State Variables
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
     
     // The data structure includes the question, options, and the index of the correct option (0=A, 1=B, 2=C, 3=D).
     const quizData = [
@@ -231,10 +264,6 @@
         "**Molar Mass Calculation:** Given the approximate atomic masses ($\\text{Na}=23, \\text{O}=16, \\text{H}=1$), calculate the molar mass of sodium hydroxide ($\\text{NaOH}$)."
     ];
 
-    // --- State Variables ---
-    let currentQuestionIndex = 0;
-    let score = 0;
-    let answered = false;
     
     // --- DOM Elements ---
     const startScreen = document.getElementById('start-screen');
@@ -242,17 +271,24 @@
     const quizScreen = document.getElementById('quiz-screen');
     const resultsScreen = document.getElementById('results-screen');
     const submissionSuccessScreen = document.getElementById('submission-success-screen'); 
-    const startQuizBtn = document.getElementById('start-quiz-btn');
-    const questionProgress = document.getElementById('question-progress');
-    const questionText = document.getElementById('question-text');
-    const optionsContainer = document.getElementById('options-container');
-    const feedbackMessage = document.getElementById('feedback-message');
+    const preQuizForm = document.getElementById('pre-quiz-form');
+    const startStudentNameInput = document.getElementById('start-student-name');
+    const startStudentNumberInput = document.getElementById('start-student-number');
     const nextQuestionBtn = document.getElementById('next-question-btn');
-    const finalScore = document.getElementById('final-score');
     const openEndedFields = document.getElementById('open-ended-fields');
     const submissionForm = document.getElementById('submission-form');
     const mcScoreInput = document.getElementById('mc-score-input');
     const submitBtn = document.getElementById('submit-btn');
+
+    // Submission fields on results screen (to be populated)
+    const resultStudentNameInput = document.getElementById('student-name');
+    const resultStudentNicknameInput = document.getElementById('student-nickname');
+    const resultStudentNumberInput = document.getElementById('student-number');
+    const finalScore = document.getElementById('final-score');
+    const questionProgress = document.getElementById('question-progress');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackMessage = document.getElementById('feedback-message');
 
 
     // --- Helper Functions ---
@@ -277,7 +313,6 @@
 
     // --- Core Logic ---
 
-    // Function to check local storage and prevent re-entry
     function checkIfLockedOut() {
         if (localStorage.getItem(LOCKOUT_KEY) === 'true') {
             startScreen.classList.add('hidden');
@@ -286,13 +321,17 @@
         }
         return false;
     }
-
-    // Shuffle the main quiz data once at the start
-    shuffleArray(quizData);
-
-    function startQuiz() {
-        if (checkIfLockedOut()) return; 
+    
+    // Handler for the initial start button click (attached to preQuizForm submit event)
+    function handleStartQuizClick(e) {
+        e.preventDefault();
         
+        // Browser native validation already passed if we reach here (since button is type="submit" inside a form)
+        
+        // Save initial identifying data to Local Storage
+        localStorage.setItem(NAME_KEY, startStudentNameInput.value);
+        localStorage.setItem(NUMBER_KEY, startStudentNumberInput.value);
+
         // 1. Set the lockout flag immediately upon starting
         localStorage.setItem(LOCKOUT_KEY, 'true'); 
 
@@ -300,6 +339,9 @@
         quizScreen.classList.remove('hidden');
         renderQuestion();
     }
+
+    // Shuffle the main quiz data once at the start
+    shuffleArray(quizData);
 
     function renderQuestion() {
         answered = false;
@@ -377,6 +419,11 @@
         finalScore.textContent = finalScoreText;
         mcScoreInput.value = finalScoreText; // Set hidden input value
         
+        // Populate student ID fields from Local Storage
+        resultStudentNameInput.value = localStorage.getItem(NAME_KEY) || '';
+        resultStudentNicknameInput.value = localStorage.getItem(NICKNAME_KEY) || ''; 
+        resultStudentNumberInput.value = localStorage.getItem(NUMBER_KEY) || '';
+
         // Render Open-Ended Questions as form fields
         openEndedFields.innerHTML = '';
         openEndedQuestions.forEach((q, index) => {
@@ -388,10 +435,9 @@
             label.innerHTML = `Q${index + 1}: ${formatText(q)}`;
             
             const textarea = document.createElement('textarea');
-            // Use a specific, safe name for Formspree
             textarea.name = `OE ${index + 1}: ${formatText(q.substring(0, 30))}...`; 
             textarea.rows = 3;
-            textarea.required = true; // Make open-ended required for submission
+            textarea.required = true; 
             textarea.className = 'mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500';
             
             fieldDiv.appendChild(label);
@@ -403,13 +449,11 @@
     async function handleFormSubmission(e) {
         e.preventDefault();
         
-        // Simple form validation check (required fields handled by browser)
         if (!submissionForm.checkValidity()) {
             submissionForm.reportValidity();
             return;
         }
 
-        // Show loading spinner
         const originalButtonHtml = submitBtn.innerHTML;
         submitBtn.disabled = true;
         submitBtn.innerHTML = '<div class="spinner mr-2"></div> Submitting...';
@@ -417,7 +461,8 @@
         try {
             const formData = new FormData(submissionForm);
             
-            // Convert FormData to a JSON payload for easier debugging/inspection if needed, though Formspree handles FormData directly
+            formData.set("Student Nickname", resultStudentNicknameInput.value);
+
             const response = await fetch(FORMSPREE_ENDPOINT, {
                 method: 'POST',
                 body: formData,
@@ -427,34 +472,33 @@
             });
 
             if (response.ok) {
-                // 2. Clear the lockout flag ONLY on successful submission
+                // Clear all Local Storage flags ONLY on successful submission
                 localStorage.removeItem(LOCKOUT_KEY); 
+                localStorage.removeItem(NAME_KEY);
+                localStorage.removeItem(NICKNAME_KEY);
+                localStorage.removeItem(NUMBER_KEY);
                 
-                // Show success screen
                 resultsScreen.classList.add('hidden');
                 submissionSuccessScreen.classList.remove('hidden');
             } else {
-                // Handle non-200 responses (e.g., Formspree error)
                 console.error("Formspree submission failed:", response);
                 alert('Submission failed. Please check your network and try again, or contact your teacher.');
             }
         } catch (error) {
-            // Handle network errors
             console.error("Network error during submission:", error);
             alert('A network error occurred. Please try again.');
         } finally {
-            // Restore button state
             submitBtn.innerHTML = originalButtonHtml;
             submitBtn.disabled = false;
         }
     }
 
     // --- Initialization ---
-    // Check for lockout immediately on page load
     checkIfLockedOut();
 
     // --- Event Listeners ---
-    startQuizBtn.addEventListener('click', startQuiz);
+    // Listen to the form's submit event for reliable native validation
+    preQuizForm.addEventListener('submit', handleStartQuizClick); 
     nextQuestionBtn.addEventListener('click', nextQuestion);
     submissionForm.addEventListener('submit', handleFormSubmission);
 </script>
