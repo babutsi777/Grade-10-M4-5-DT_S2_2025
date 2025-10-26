@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chemistry Diagnostic Quiz</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f0f4f8; /* Light blue-gray background */
+        }
+        .quiz-card {
+            background-color: #ffffff;
+            border-radius: 1.5rem; /* Rounded corners */
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s ease;
+        }
+        .option-button {
+            transition: all 0.2s ease-in-out;
+            transform: scale(1);
+        }
+        .option-button:hover:not(.disabled) {
+            transform: scale(1.02);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        /* Custom class for correct answer */
+        .correct {
+            background-color: #4ade80 !important; /* Green 400 */
+            color: white !important;
+            border-color: #15803d !important;
+            box-shadow: 0 4px 10px rgba(16, 185, 129, 0.4);
+        }
+        /* Custom class for incorrect answer */
+        .incorrect {
+            background-color: #f87171 !important; /* Red 400 */
+            color: white !important;
+            border-color: #b91c1c !important;
+            box-shadow: 0 4px 10px rgba(248, 113, 113, 0.4);
+        }
+        .disabled {
+            pointer-events: none;
+            opacity: 0.7;
+        }
+        .quiz-title-gradient {
+            background-image: linear-gradient(to right, #6366f1, #3b82f6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        /* Loading Spinner Animation */
+        .spinner {
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 4px solid white;
+            width: 1.5rem;
+            height: 1.5rem;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body class="p-4 md:p-8 min-h-screen flex items-center justify-center">
+
+<div id="app" class="w-full max-w-2xl">
+    <!-- Quiz Title -->
+    <h1 class="text-4xl font-extrabold text-center mb-6 quiz-title-gradient">
+        Chemistry Diagnostic Quiz
+    </h1>
+
+    <!-- Start Screen -->
+    <div id="start-screen" class="quiz-card p-8 text-center">
+        <h2 class="text-2xl font-bold mb-4 text-gray-700">Welcome, M4/5 EP Students!</h2>
+        <p class="text-gray-600 mb-6">This quiz has 30 multiple-choice questions to test your basic chemistry and math skills before we start the course.</p>
+        <p class="text-xl font-semibold mb-8 text-indigo-500">Total Questions: 30 MC + 10 Open-Ended</p>
+        <p class="text-red-500 font-bold mb-6 border-2 border-red-300 p-3 rounded-xl bg-red-50">
+            WARNING: This is a ONE-TIME test. Once you start, you must finish and submit, or your session will be locked!
+        </p>
+        <button id="start-quiz-btn" class="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-300">
+            Start Quiz
+        </button>
+    </div>
+
+    <!-- Quiz Already Taken/Abandoned Screen (LOCKOUT) -->
+    <div id="completed-screen" class="quiz-card p-8 hidden text-center bg-yellow-50 border-4 border-yellow-300">
+        <h2 class="text-3xl font-extrabold mb-4 text-yellow-700">Test Session Used</h2>
+        <p class="text-gray-700 text-lg mb-6 font-semibold">
+            This diagnostic test allows only one continuous session per device.
+        </p>
+        <p class="text-gray-600 text-md italic">
+            If you have already submitted your answers, thank you. If you abandoned the test, your session is now locked. Please contact your teacher if you believe this is an error.
+        </p>
+        <button onclick="window.location.reload()" class="mt-8 w-full bg-yellow-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-yellow-700 transition duration-300 shadow-lg shadow-yellow-300">
+            OK
+        </button>
+    </div>
+
+    <!-- Quiz Screen -->
+    <div id="quiz-screen" class="quiz-card p-6 md:p-10 hidden">
+        <p class="text-sm font-medium text-indigo-500 mb-4" id="question-progress">Question 1 / 30</p>
+        
+        <div class="bg-indigo-50 p-4 rounded-xl mb-6 border-l-4 border-indigo-400">
+            <h3 class="text-xl font-semibold text-gray-800" id="question-text"></h3>
+        </div>
+
+        <div id="options-container" class="space-y-4">
+            <!-- Options will be injected here -->
+        </div>
+
+        <div class="mt-8 pt-6 border-t border-gray-100 flex justify-between items-center">
+            <div id="feedback-message" class="text-lg font-semibold h-6"></div>
+            <button id="next-question-btn" class="bg-gray-400 text-white py-2 px-6 rounded-xl font-semibold disabled transition duration-300 shadow-md shadow-gray-200" disabled>
+                Next &rarr;
+            </button>
+        </div>
+    </div>
+
+    <!-- Results Screen (Submission Prep) -->
+    <div id="results-screen" class="quiz-card p-8 hidden text-center">
+        <h2 class="text-3xl font-extrabold mb-4 text-green-600">MC Quiz Completed! 🎉</h2>
+        <p class="text-gray-700 text-xl mb-4">Your score on the Multiple Choice section is:</p>
+        <div class="inline-block p-6 rounded-full bg-green-100 border-4 border-green-500 mb-8">
+            <span id="final-score" class="text-5xl font-bold text-green-700">0/30</span>
+        </div>
+        
+        <h3 class="text-xl font-bold text-indigo-600 mb-4 border-b pb-2">Section II: Final Submission</h3>
+        <p class="text-sm text-gray-600 mb-6 font-bold text-red-600">
+            You are still in your session. Please complete the following steps to submit your test and clear the session lock.
+        </p>
+
+        <!-- Formspree Submission Form -->
+        <form id="submission-form" class="space-y-6 text-left">
+            <input type="hidden" name="MC Score" id="mc-score-input" value="0/30">
+            
+            <!-- STUDENT IDENTIFICATION FIELDS -->
+            <label for="student-name" class="block text-sm font-medium text-gray-700 mt-6">1. Complete Name (Required)</label>
+            <input type="text" name="Complete Name" id="student-name" required 
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            
+            <label for="student-nickname" class="block text-sm font-medium text-gray-700 mt-4">2. Nickname</label>
+            <input type="text" name="Student Nickname" id="student-nickname"
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+
+            <label for="student-number" class="block text-sm font-medium text-gray-700 mt-4">3. Student Number (Required - for verification)</label>
+            <input type="text" name="Student Number" id="student-number" required 
+                   class="mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+            <!-- END STUDENT IDENTIFICATION FIELDS -->
+
+            <h4 class="text-lg font-bold text-gray-800 pt-4">4. Open-Ended Answers</h4>
+
+            <div id="open-ended-fields" class="space-y-5">
+                <!-- Open-ended questions (textareas) will be injected here -->
+            </div>
+            
+            <button type="submit" id="submit-btn" class="w-full bg-indigo-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-indigo-700 transition duration-300 shadow-lg shadow-indigo-300 flex items-center justify-center">
+                Submit Open-Ended Answers
+            </button>
+        </form>
+    </div>
+
+    <!-- Final Submission Confirmation Screen (NEW) -->
+    <div id="submission-success-screen" class="quiz-card p-8 hidden text-center bg-green-50 border-4 border-green-300">
+        <h2 class="text-3xl font-extrabold mb-4 text-green-700">Submission Complete! ✅</h2>
+        <p class="text-gray-700 text-lg mb-6 font-semibold">
+            Thank you. Your answers have been successfully submitted, and your session lock has been cleared.
+        </p>
+        <p class="text-gray-600 text-md italic">You may now safely close this window.</p>
+        <button onclick="window.location.reload()" class="mt-8 w-full bg-green-600 text-white py-3 px-6 rounded-xl font-semibold text-lg hover:bg-green-700 transition duration-300 shadow-lg shadow-green-300">
+            Finish
+        </button>
+    </div>
+</div>
+
+<script>
+    // --- Configuration and Data ---
+    const FORMSPREE_ENDPOINT = "YOUR_FORMSPREE_ENDPOINT"; // <<< REPLACE THIS
+    const LOCKOUT_KEY = 'diagnosticLockout';
+    
+    // The data structure includes the question, options, and the index of the correct option (0=A, 1=B, 2=C, 3=D).
+    const quizData = [
+        { q: "Calculate $25\\%$ of $80$.", options: ["40", "20", "10", "50"], correctIndex: 1, topic: "Math" },
+        { q: "Convert the fraction $\\frac{3}{4}$ to a decimal.", options: ["1.33", "0.34", "0.43", "0.75"], correctIndex: 3, topic: "Math" },
+        { q: "Express the number $0.00045$ in proper scientific notation.", options: ["$4.5 \\times 10^{-5}$", "$4.5 \\times 10^{-4}$", "$45 \\times 10^{-5}$", "$4.5 \\times 10^{4}$"], correctIndex: 1, topic: "Math" },
+        { q: "What is the result of solving for $X$ in the equation: $\\frac{10}{X} = 2$?", options: ["5", "20", "8", "0.2"], correctIndex: 0, topic: "Math" },
+        { q: "Round the number $3.14159$ to three significant figures.", options: ["3.142", "3.15", "3.14", "3.141"], correctIndex: 2, topic: "Math" },
+        { q: "Convert $500 \\text{ milligrams (mg)}$ to grams (g).", options: ["5000 g", "0.05 g", "50 g", "0.5 g"], correctIndex: 3, topic: "Math" },
+        
+        { q: "How is the **mass number** of an atom primarily determined?", options: ["The sum of protons and neutrons", "The number of electrons", "The number of protons", "The number of neutrons minus the number of protons"], correctIndex: 0, topic: "Structure" },
+        { q: "How many **valence electrons** does an element in Group $17$ (Halogens) of the Periodic Table typically have?", options: ["8", "2", "7", "1"], correctIndex: 2, topic: "Structure" },
+        { q: "An ion with $11 \\text{ protons}$ and $10 \\text{ electrons}$ has a net charge of:", options: ["$+11$", "$-1$", "neutral", "$+1$"], correctIndex: 3, topic: "Structure" },
+        { q: "What is the maximum number of electrons that can occupy the first electron shell ($n=1$)?", options: ["8", "18", "2", "32"], correctIndex: 2, topic: "Structure" },
+        { q: "Which property is most characteristic of **nonmetals**?", options: ["Malleable (can be hammered)", "Brittle (breaks easily) and poor conductor", "Excellent conductor of heat", "Ductile (can be drawn into wires)"], correctIndex: 1, topic: "Structure" },
+        { q: "Which term describes the property where a substance can be hammered into thin sheets without breaking?", options: ["Malleability", "Insulation", "Brittleness", "Ductility"], correctIndex: 0, topic: "Structure" },
+
+        { q: "In a common sugar-water solution, the **solvent** is the:", options: ["The salt added to the mixture", "Sugar", "The resulting solution", "Water"], correctIndex: 3, topic: "Vocabulary" },
+        { q: "The term **Precipitation** in chemistry refers to:", options: ["The chemical energy stored in a bond.", "The rate at which a solute dissolves.", "The formation of a solid that separates from a liquid solution.", "The process of water turning into steam."], correctIndex: 2, topic: "Vocabulary" },
+        { q: "If a chemical **equation** is **unbalanced**, what is fundamentally wrong with it according to the Law of Conservation of Mass?", options: ["The total number of atoms on the reactant side is not equal to the total number of atoms on the product side.", "The reaction is taking place too slowly.", "The total volume of products is too small.", "The molecules are named incorrectly."], correctIndex: 0, topic: "Vocabulary" },
+        { q: "What does the term **enthalpy** ($\\Delta H$) primarily measure in a chemical process?", options: ["The length of the chemical bond.", "The speed of the reaction.", "The charge of the resulting ion.", "The total energy change (heat absorbed or released) at constant pressure."], correctIndex: 3, topic: "Vocabulary" },
+        { q: "If the **limiting reagent** runs out, the other substance remaining is the:", options: ["Product", "Catalyst", "Excess Reagent", "Stoichiometric equivalent"], correctIndex: 2, topic: "Vocabulary" },
+        { q: "The **mole (mol)** is the SI unit for:", options: ["Amount of Substance", "Concentration", "Volume", "Mass"], correctIndex: 0, topic: "Vocabulary" },
+
+        { q: "Which of the following represents the **non-bonding electron pairs** in a Lewis structure?", options: ["Lines connecting two atoms", "Dots placed next to a single atom symbol", "The element's atomic number", "The shared electrons between atoms"], correctIndex: 1, topic: "Bonding" },
+        { q: "The term **lattice energy** is most relevant when describing which type of solid?", options: ["Covalent network solids (e.g., Diamond)", "Simple molecular solids (e.g., Ice)", "Ionic solids (e.g., $\\text{NaCl}$)", "Metallic solids (e.g., Copper)"], correctIndex: 2, topic: "Bonding" },
+        { q: "If **Bond Energy** increases, what generally happens to the **bond length**?", options: ["Bond length decreases", "The bond changes from covalent to ionic", "Bond length stays the same", "Bond length increases"], correctIndex: 0, topic: "Bonding" },
+        { q: "The **VSEPR theory** helps predict what property of a molecule?", options: ["Its electrical charge", "Its melting point", "Its bond energy", "Its three-dimensional molecular shape"], correctIndex: 3, topic: "Bonding" },
+        { q: "What is the common name for the covalently bonded compound $\\text{CO}_2$?", options: ["Monocarbon dioxide", "Carbon dioxide", "Carbon (II) oxide", "Carbon oxide"], correctIndex: 1, topic: "Bonding" },
+        { q: "A molecule is considered **polar** if its electrons are:", options: ["Shared equally between atoms.", "All located around the central atom.", "Shared unequally, creating a positive and a negative end.", "Transferred completely to one atom."], correctIndex: 2, topic: "Bonding" },
+
+        { q: "The approximate numerical value of Avogadro's number is:", options: ["$6.02 \\times 10^{22}$", "$22.4 \\text{ L}$", "$6.02 \\times 10^{23}$", "$1.0 \\text{ gram}$"], correctIndex: 2, topic: "Calc/Sol" },
+        { q: "If the molar mass of substance $\\text{X}$ is $25 \\text{ g/mol}$, how many moles are in a $50 \\text{ g}$ sample of $\\text{X}$?", options: ["25 moles", "0.5 moles", "2 moles", "1250 moles"], correctIndex: 2, topic: "Calc/Sol" },
+        { q: "The process of adding more solvent to a solution to lower its concentration is called:", options: ["Saturation", "Molarity", "Dilution", "Precipitation"], correctIndex: 2, topic: "Calc/Sol" },
+        { q: "Properties of a solution that depend *only* on the **number** of dissolved solute particles are known as:", options: ["Intramolecular Forces", "Colligative Properties", "Stoichiometric Properties", "Constitutional Properties"], correctIndex: 1, topic: "Calc/Sol" },
+        { q: "A chemical reaction that **absorbs heat** from the surroundings is classified as:", options: ["Isothermic", "Exothermic", "Catalytic", "Endothermic"], correctIndex: 3, topic: "Calc/Sol" },
+        { q: "In a phase diagram, the **triple point** is where:", options: ["The substance transitions directly from solid to gas (sublimation).", "All three phases (solid, liquid, and gas) coexist in equilibrium.", "The substance is most dense.", "The boiling point equals the critical temperature."], correctIndex: 1, topic: "Calc/Sol" }
+    ];
+
+    // Open-ended questions to be displayed on the results screen
+    const openEndedQuestions = [
+        "**Atomic Quantities:** Define the terms **molecular mass** and **formula unit**.",
+        "**Visualization and Polarity:** Sketch the Lewis structure for a water molecule ($\text{H}_2\text{O}$) and briefly explain in one sentence why water is considered a **polar** molecule.",
+        "**Real-Life Vocabulary:** Explain in one simple sentence what the chemical term **solubility** means, and give one common real-life example of a soluble substance.",
+        "**Chemical Balancing:** Balance the following chemical equation: $\text{Fe} + \text{O}_2 \\rightarrow \text{Fe}_2\text{O}_3$",
+        "**Energy Cycle Concept:** What is the primary **purpose** of the **Born-Haber cycle** in chemical energy calculations?",
+        "**Formula Distinction:** Explain the difference between the **Empirical Formula** and the **Molecular Formula** of a compound.",
+        "**Reaction Stoichiometry:** What is a **limiting reagent** in a chemical reaction?",
+        "**Concentration Estimation:** If you dissolve $0.1 \\text{ grams}$ of a colorful dye in $1000 \\text{ liters}$ of water, would the resulting concentration be best expressed using **Molarity** ($\text{M}$) or **Parts Per Million** ($\text{ppm}$)? Briefly justify your choice.",
+        "**Phase Diagram Interpretation:** In a typical phase diagram, what does the line segment between the **solid region** and the **liquid region** represent?",
+        "**Molar Mass Calculation:** Given the approximate atomic masses ($\\text{Na}=23, \\text{O}=16, \\text{H}=1$), calculate the molar mass of sodium hydroxide ($\\text{NaOH}$)."
+    ];
+
+    // --- State Variables ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let answered = false;
+    
+    // --- DOM Elements ---
+    const startScreen = document.getElementById('start-screen');
+    const completedScreen = document.getElementById('completed-screen'); 
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultsScreen = document.getElementById('results-screen');
+    const submissionSuccessScreen = document.getElementById('submission-success-screen'); 
+    const startQuizBtn = document.getElementById('start-quiz-btn');
+    const questionProgress = document.getElementById('question-progress');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+    const feedbackMessage = document.getElementById('feedback-message');
+    const nextQuestionBtn = document.getElementById('next-question-btn');
+    const finalScore = document.getElementById('final-score');
+    const openEndedFields = document.getElementById('open-ended-fields');
+    const submissionForm = document.getElementById('submission-form');
+    const mcScoreInput = document.getElementById('mc-score-input');
+    const submitBtn = document.getElementById('submit-btn');
+
+
+    // --- Helper Functions ---
+
+    // Function to shuffle an array (Fisher-Yates)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+    }
+
+    // Replace LaTeX-style notation for display
+    function formatText(text) {
+        text = text.replace(/\\text\{(\w+)\}/g, '$1');
+        text = text.replace(/\$/g, '');
+        text = text.replace(/\\frac{(\d)}{(\d)}/g, '($1/$2)');
+        text = text.replace(/\\times/g, '×');
+        text = text.replace(/\\rightarrow/g, '→');
+        return text;
+    }
+
+    // --- Core Logic ---
+
+    // Function to check local storage and prevent re-entry
+    function checkIfLockedOut() {
+        if (localStorage.getItem(LOCKOUT_KEY) === 'true') {
+            startScreen.classList.add('hidden');
+            completedScreen.classList.remove('hidden');
+            return true;
+        }
+        return false;
+    }
+
+    // Shuffle the main quiz data once at the start
+    shuffleArray(quizData);
+
+    function startQuiz() {
+        if (checkIfLockedOut()) return; 
+        
+        // 1. Set the lockout flag immediately upon starting
+        localStorage.setItem(LOCKOUT_KEY, 'true'); 
+
+        startScreen.classList.add('hidden');
+        quizScreen.classList.remove('hidden');
+        renderQuestion();
+    }
+
+    function renderQuestion() {
+        answered = false;
+        feedbackMessage.textContent = '';
+        nextQuestionBtn.classList.add('disabled');
+        nextQuestionBtn.disabled = true;
+        nextQuestionBtn.classList.remove('bg-indigo-600', 'hover:bg-indigo-700');
+        nextQuestionBtn.classList.add('bg-gray-400');
+        
+        const currentQ = quizData[currentQuestionIndex];
+        
+        questionProgress.textContent = `Question ${currentQuestionIndex + 1} / ${quizData.length}`;
+        questionText.innerHTML = formatText(currentQ.q);
+        optionsContainer.innerHTML = '';
+        
+        // Render options
+        currentQ.options.forEach((option, index) => {
+            const button = document.createElement('button');
+            const optionLetter = String.fromCharCode(65 + index); // A, B, C, D
+            
+            button.className = 'option-button w-full text-left p-3 md:p-4 rounded-xl border-2 border-indigo-200 bg-indigo-50 text-gray-700 font-medium hover:bg-indigo-100 transition duration-150 shadow-sm shadow-indigo-100';
+            button.innerHTML = `<span class="font-bold mr-3">${optionLetter}.</span> ${formatText(option)}`;
+            button.onclick = () => handleAnswer(index, button);
+            optionsContainer.appendChild(button);
+        });
+    }
+
+    function handleAnswer(selectedIndex, selectedButton) {
+        if (answered) return;
+        answered = true;
+        
+        const currentQ = quizData[currentQuestionIndex];
+        const correctAnswerIndex = currentQ.correctIndex;
+        
+        const allButtons = optionsContainer.querySelectorAll('.option-button');
+
+        // Disable all buttons
+        allButtons.forEach(btn => btn.classList.add('disabled'));
+
+        if (selectedIndex === correctAnswerIndex) {
+            score++;
+            selectedButton.classList.add('correct');
+            feedbackMessage.textContent = 'Correct! Great job!';
+            feedbackMessage.classList.remove('text-red-600');
+            feedbackMessage.classList.add('text-green-600');
+        } else {
+            selectedButton.classList.add('incorrect');
+            // Highlight the correct answer
+            allButtons[correctAnswerIndex].classList.add('correct');
+            feedbackMessage.textContent = 'Incorrect. Review the concept before moving on.';
+            feedbackMessage.classList.remove('text-green-600');
+            feedbackMessage.classList.add('text-red-600');
+        }
+
+        // Enable next button
+        nextQuestionBtn.classList.remove('disabled');
+        nextQuestionBtn.disabled = false;
+        nextQuestionBtn.classList.remove('bg-gray-400');
+        nextQuestionBtn.classList.add('bg-indigo-600', 'hover:bg-indigo-700');
+    }
+
+    function nextQuestion() {
+        currentQuestionIndex++;
+        if (currentQuestionIndex < quizData.length) {
+            renderQuestion();
+        } else {
+            showResults();
+        }
+    }
+
+    function showResults() {
+        quizScreen.classList.add('hidden');
+        resultsScreen.classList.remove('hidden');
+        const finalScoreText = `${score}/${quizData.length}`;
+        finalScore.textContent = finalScoreText;
+        mcScoreInput.value = finalScoreText; // Set hidden input value
+        
+        // Render Open-Ended Questions as form fields
+        openEndedFields.innerHTML = '';
+        openEndedQuestions.forEach((q, index) => {
+            const fieldDiv = document.createElement('div');
+            fieldDiv.className = 'open-ended-field';
+            
+            const label = document.createElement('label');
+            label.className = 'block text-sm font-semibold text-gray-700 mb-1';
+            label.innerHTML = `Q${index + 1}: ${formatText(q)}`;
+            
+            const textarea = document.createElement('textarea');
+            // Use a specific, safe name for Formspree
+            textarea.name = `OE ${index + 1}: ${formatText(q.substring(0, 30))}...`; 
+            textarea.rows = 3;
+            textarea.required = true; // Make open-ended required for submission
+            textarea.className = 'mt-1 block w-full p-3 border border-gray-300 rounded-lg shadow-sm focus:ring-indigo-500 focus:border-indigo-500';
+            
+            fieldDiv.appendChild(label);
+            fieldDiv.appendChild(textarea);
+            openEndedFields.appendChild(fieldDiv);
+        });
+    }
+
+    async function handleFormSubmission(e) {
+        e.preventDefault();
+        
+        // Simple form validation check (required fields handled by browser)
+        if (!submissionForm.checkValidity()) {
+            submissionForm.reportValidity();
+            return;
+        }
+
+        // Show loading spinner
+        const originalButtonHtml = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<div class="spinner mr-2"></div> Submitting...';
+        
+        try {
+            const formData = new FormData(submissionForm);
+            
+            // Convert FormData to a JSON payload for easier debugging/inspection if needed, though Formspree handles FormData directly
+            const response = await fetch(FORMSPREE_ENDPOINT, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'Accept': 'application/json',
+                }
+            });
+
+            if (response.ok) {
+                // 2. Clear the lockout flag ONLY on successful submission
+                localStorage.removeItem(LOCKOUT_KEY); 
+                
+                // Show success screen
+                resultsScreen.classList.add('hidden');
+                submissionSuccessScreen.classList.remove('hidden');
+            } else {
+                // Handle non-200 responses (e.g., Formspree error)
+                console.error("Formspree submission failed:", response);
+                alert('Submission failed. Please check your network and try again, or contact your teacher.');
+            }
+        } catch (error) {
+            // Handle network errors
+            console.error("Network error during submission:", error);
+            alert('A network error occurred. Please try again.');
+        } finally {
+            // Restore button state
+            submitBtn.innerHTML = originalButtonHtml;
+            submitBtn.disabled = false;
+        }
+    }
+
+    // --- Initialization ---
+    // Check for lockout immediately on page load
+    checkIfLockedOut();
+
+    // --- Event Listeners ---
+    startQuizBtn.addEventListener('click', startQuiz);
+    nextQuestionBtn.addEventListener('click', nextQuestion);
+    submissionForm.addEventListener('submit', handleFormSubmission);
+</script>
+
+</body>
+</html>
