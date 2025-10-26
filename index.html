@@ -214,16 +214,16 @@
     
     // The data structure includes the question, options, and the index of the correct option (0=A, 1=B, 2=C, 3=D).
     const quizData = [
-        { q: "Calculate $25\\%$ of $80$.", options: ["40", "20", "10", "50"], correctIndex: 1, topic: "Math" },
-        { q: "Convert the fraction $\\frac{3}{4}$ to a decimal.", options: ["1.33", "0.34", "0.43", "0.75"], correctIndex: 3, topic: "Math" },
-        { q: "Express the number $0.00045$ in proper scientific notation.", options: ["$4.5 \\times 10^{-5}$", "$4.5 \\times 10^{-4}$", "$45 \\times 10^{-5}$", "$4.5 \\times 10^{4}$"], correctIndex: 1, topic: "Math" },
-        { q: "What is the result of solving for $X$ in the equation: $\\frac{10}{X} = 2$?", options: ["5", "20", "8", "0.2"], correctIndex: 0, topic: "Math" },
+        { q: "Calculate 25% of 80.", options: ["40", "20", "10", "50"], correctIndex: 1, topic: "Math" },
+        { q: "Convert the fraction 3/4 to a decimal.", options: ["1.33", "0.34", "0.43", "0.75"], correctIndex: 3, topic: "Math" },
+        { q: "Express the number 0.00045 in proper scientific notation.", options: ["4.5 x 10^-5", "4.5 x 10^-4", "45 x 10^-5", "4.5 x 10^4"], correctIndex: 1, topic: "Math" },
+        { q: "What is the result of solving for X in the equation: 10/X = 2?", options: ["5", "20", "8", "0.2"], correctIndex: 0, topic: "Math" },
         { q: "Round the number $3.14159$ to three significant figures.", options: ["3.142", "3.15", "3.14", "3.141"], correctIndex: 2, topic: "Math" },
-        { q: "Convert $500 \\text{ milligrams (mg)}$ to grams (g).", options: ["5000 g", "0.05 g", "50 g", "0.5 g"], correctIndex: 3, topic: "Math" },
+        { q: "Convert 500 milligrams (mg) to grams (g).", options: ["5000 g", "0.05 g", "50 g", "0.5 g"], correctIndex: 3, topic: "Math" },
         
         { q: "How is the **mass number** of an atom primarily determined?", options: ["The sum of protons and neutrons", "The number of electrons", "The number of protons", "The number of neutrons minus the number of protons"], correctIndex: 0, topic: "Structure" },
-        { q: "How many **valence electrons** does an element in Group $17$ (Halogens) of the Periodic Table typically have?", options: ["8", "2", "7", "1"], correctIndex: 2, topic: "Structure" },
-        { q: "An ion with $11 \\text{ protons}$ and $10 \\text{ electrons}$ has a net charge of:", options: ["$+11$", "$-1$", "neutral", "$+1$"], correctIndex: 3, topic: "Structure" },
+        { q: "How many **valence electrons** does an element in Group 17 (Halogens) of the Periodic Table typically have?", options: ["8", "2", "7", "1"], correctIndex: 2, topic: "Structure" },
+        { q: "An ion with 11 protons and 10 electrons has a net charge of:", options: ["$+11$", "$-1$", "neutral", "$+1$"], correctIndex: 3, topic: "Structure" },
         { q: "What is the maximum number of electrons that can occupy the first electron shell ($n=1$)?", options: ["8", "18", "2", "32"], correctIndex: 2, topic: "Structure" },
         { q: "Which property is most characteristic of **nonmetals**?", options: ["Malleable (can be hammered)", "Brittle (breaks easily) and poor conductor", "Excellent conductor of heat", "Ductile (can be drawn into wires)"], correctIndex: 1, topic: "Structure" },
         { q: "Which term describes the property where a substance can be hammered into thin sheets without breaking?", options: ["Malleability", "Insulation", "Brittleness", "Ductility"], correctIndex: 0, topic: "Structure" },
@@ -231,7 +231,7 @@
         { q: "In a common sugar-water solution, the **solvent** is the:", options: ["The salt added to the mixture", "Sugar", "The resulting solution", "Water"], correctIndex: 3, topic: "Vocabulary" },
         { q: "The term **Precipitation** in chemistry refers to:", options: ["The chemical energy stored in a bond.", "The rate at which a solute dissolves.", "The formation of a solid that separates from a liquid solution.", "The process of water turning into steam."], correctIndex: 2, topic: "Vocabulary" },
         { q: "If a chemical **equation** is **unbalanced**, what is fundamentally wrong with it according to the Law of Conservation of Mass?", options: ["The total number of atoms on the reactant side is not equal to the total number of atoms on the product side.", "The reaction is taking place too slowly.", "The total volume of products is too small.", "The molecules are named incorrectly."], correctIndex: 0, topic: "Vocabulary" },
-        { q: "What does the term **enthalpy** ($\\Delta H$) primarily measure in a chemical process?", options: ["The length of the chemical bond.", "The speed of the reaction.", "The charge of the resulting ion.", "The total energy change (heat absorbed or released) at constant pressure."], correctIndex: 3, topic: "Vocabulary" },
+        { q: "What does the term "enthalpy" primarily measure in a chemical process?", options: ["The length of the chemical bond.", "The speed of the reaction.", "The charge of the resulting ion.", "The total energy change (heat absorbed or released) at constant pressure."], correctIndex: 3, topic: "Vocabulary" },
         { q: "If the **limiting reagent** runs out, the other substance remaining is the:", options: ["Product", "Catalyst", "Excess Reagent", "Stoichiometric equivalent"], correctIndex: 2, topic: "Vocabulary" },
         { q: "The **mole (mol)** is the SI unit for:", options: ["Amount of Substance", "Concentration", "Volume", "Mass"], correctIndex: 0, topic: "Vocabulary" },
 
@@ -242,8 +242,8 @@
         { q: "What is the common name for the covalently bonded compound $\\text{CO}_2$?", options: ["Monocarbon dioxide", "Carbon dioxide", "Carbon (II) oxide", "Carbon oxide"], correctIndex: 1, topic: "Bonding" },
         { q: "A molecule is considered **polar** if its electrons are:", options: ["Shared equally between atoms.", "All located around the central atom.", "Shared unequally, creating a positive and a negative end.", "Transferred completely to one atom."], correctIndex: 2, topic: "Bonding" },
 
-        { q: "The approximate numerical value of Avogadro's number is:", options: ["$6.02 \\times 10^{22}$", "$22.4 \\text{ L}$", "$6.02 \\times 10^{23}$", "$1.0 \\text{ gram}$"], correctIndex: 2, topic: "Calc/Sol" },
-        { q: "If the molar mass of substance $\\text{X}$ is $25 \\text{ g/mol}$, how many moles are in a $50 \\text{ g}$ sample of $\\text{X}$?", options: ["25 moles", "0.5 moles", "2 moles", "1250 moles"], correctIndex: 2, topic: "Calc/Sol" },
+        { q: "The approximate numerical value of Avogadro's number is:", options: ["6.02 x 10^22", "22.4 L", "6.02 x 10^23", "1.0 gram"], correctIndex: 2, topic: "Calc/Sol" },
+        { q: "If the molar mass of substance X is 25 g/mol, how many moles are in a 50g sample of X?", options: ["25 moles", "0.5 moles", "2 moles", "1250 moles"], correctIndex: 2, topic: "Calc/Sol" },
         { q: "The process of adding more solvent to a solution to lower its concentration is called:", options: ["Saturation", "Molarity", "Dilution", "Precipitation"], correctIndex: 2, topic: "Calc/Sol" },
         { q: "Properties of a solution that depend *only* on the **number** of dissolved solute particles are known as:", options: ["Intramolecular Forces", "Colligative Properties", "Stoichiometric Properties", "Constitutional Properties"], correctIndex: 1, topic: "Calc/Sol" },
         { q: "A chemical reaction that **absorbs heat** from the surroundings is classified as:", options: ["Isothermic", "Exothermic", "Catalytic", "Endothermic"], correctIndex: 3, topic: "Calc/Sol" },
@@ -252,16 +252,16 @@
 
     // Open-ended questions to be displayed on the results screen
     const openEndedQuestions = [
-        "**Atomic Quantities:** Define the terms **molecular mass** and **formula unit**.",
-        "**Visualization and Polarity:** Sketch the Lewis structure for a water molecule ($\text{H}_2\text{O}$) and briefly explain in one sentence why water is considered a **polar** molecule.",
+        "**Define the terms **molecular mass** and **formula unit**.",
+        "**Visualization and Polarity:** Sketch the Lewis structure for a water molecule H2O and briefly explain in one sentence why water is considered a **polar** molecule.",
         "**Real-Life Vocabulary:** Explain in one simple sentence what the chemical term **solubility** means, and give one common real-life example of a soluble substance.",
-        "**Chemical Balancing:** Balance the following chemical equation: $\text{Fe} + \text{O}_2 \\rightarrow \text{Fe}_2\text{O}_3$",
+        "**Chemical Balancing:** Balance the following chemical equation: Fe + O2 --> Fe2O3
         "**Energy Cycle Concept:** What is the primary **purpose** of the **Born-Haber cycle** in chemical energy calculations?",
         "**Formula Distinction:** Explain the difference between the **Empirical Formula** and the **Molecular Formula** of a compound.",
         "**Reaction Stoichiometry:** What is a **limiting reagent** in a chemical reaction?",
-        "**Concentration Estimation:** If you dissolve $0.1 \\text{ grams}$ of a colorful dye in $1000 \\text{ liters}$ of water, would the resulting concentration be best expressed using **Molarity** ($\text{M}$) or **Parts Per Million** ($\text{ppm}$)? Briefly justify your choice.",
+        "**Concentration Estimation:** If you dissolve 0.1 grams of a colorful dye in 1000 liters of water, would the resulting concentration be best expressed using **Molarity** M or **Parts Per Million** ppm? Briefly justify your choice.",
         "**Phase Diagram Interpretation:** In a typical phase diagram, what does the line segment between the **solid region** and the **liquid region** represent?",
-        "**Molar Mass Calculation:** Given the approximate atomic masses ($\\text{Na}=23, \\text{O}=16, \\text{H}=1$), calculate the molar mass of sodium hydroxide ($\\text{NaOH}$)."
+        "**Molar Mass Calculation:** Given the approximate atomic masses Na=23, O=16, H=1, calculate the molar mass of sodium hydroxide NaOH."
     ];
 
     
