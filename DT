@@ -176,7 +176,7 @@
 
 <script>
     // --- Configuration and Data ---
-    const FORMSPREE_ENDPOINT = "YOUR_FORMSPREE_ENDPOINT"; // <<< REPLACE THIS
+    const FORMSPREE_ENDPOINT = "https://formspree.io/f/mdkpkoaq"; // <<< REPLACE THIS
     const LOCKOUT_KEY = 'diagnosticLockout';
     
     // The data structure includes the question, options, and the index of the correct option (0=A, 1=B, 2=C, 3=D).
