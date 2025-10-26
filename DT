@@ -132,7 +132,7 @@
         </p>
 
         <!-- Formspree Submission Form -->
-        <form id="submission-form" class="space-y-6 text-left">
+        <form id="https://formspree.io/f/mdkpkoaq" class="space-y-6 text-left">
             <input type="hidden" name="MC Score" id="mc-score-input" value="0/30">
             
             <!-- STUDENT IDENTIFICATION FIELDS -->
@@ -176,7 +176,7 @@
 
 <script>
     // --- Configuration and Data ---
-    const FORMSPREE_ENDPOINT = https://formspree.io/f/mdkpkoaq // <<< REPLACE THIS
+    const FORMSPREE_ENDPOINT = https://formspree.io/f/mdkpkoaq// <<< REPLACE THIS
     const LOCKOUT_KEY = 'diagnosticLockout';
     
     // The data structure includes the question, options, and the index of the correct option (0=A, 1=B, 2=C, 3=D).
